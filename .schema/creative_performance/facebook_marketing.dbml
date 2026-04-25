@@ -1,0 +1,589 @@
+Table "adcreatives" [note: 'concept: Creative | role: primary | natural_key: id | also_source_for: AdAccount (denorm), CreativeFeatureFlag (wide unpivot)'] {
+    "id" text [pk, not null, note: 'natural_key']
+    "account_id" text
+    "name" text
+    "status" text
+    "image_hash" text
+    "image_url" text
+    "thumbnail_url" text
+    "instagram_user_id" text
+    "effective_object_story_id" text
+    "object_type" text
+    "call_to_action_type" text
+    "degrees_of_freedom_spec__creative_features_spec__video_uncrop__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__video_filtering__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__video_auto_crop__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__text_translation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__text_optimizations__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__text_optimizations__customizations__text_extraction__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__standard_enhancements__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__site_extensions__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__show_summary__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__show_destination_blurbs__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__reveal_details_over_time__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__replace_media_text__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__product_extensions__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__product_extensions__customizations__pe_carousel__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__pac_relaxation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__inline_comment__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_touchups__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_templates__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_brightness_and_contrast__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_animation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__enhance_cta__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__enhance_cta__customizations__text_extraction__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__cv_transformation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__carousel_to_video__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__biz_ai__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__advantage_plus_creative__enroll_status" text
+    "asset_feed_spec__optimization_type" text
+    "object_story_spec__page_id" text
+    "object_story_spec__instagram_user_id" text
+    "object_story_spec__link_data__link" text
+    "object_story_spec__link_data__image_hash" text
+    "object_story_spec__link_data__use_flexible_image_aspect_ratio" bool
+    "object_story_spec__link_data__call_to_action__type" text
+    "object_story_spec__link_data__call_to_action__value__link" text
+    "_dlt_load_id" text [not null]
+    "_dlt_id" text [unique, not null]
+    "object_story_spec__link_data__message" text
+    "object_story_spec__link_data__name" text
+    "object_story_spec__link_data__description" text
+    "video_id" text
+    "degrees_of_freedom_spec__creative_features_spec__creative_stickers__enroll_status" text
+    "object_story_spec__video_data__video_id" text
+    "object_story_spec__video_data__title" text
+    "object_story_spec__video_data__message" text
+    "object_story_spec__video_data__image_url" text
+    "object_story_spec__video_data__image_hash" text
+    "object_story_spec__video_data__call_to_action__type" text
+    "object_story_spec__video_data__call_to_action__value__link" text
+    "product_set_id" text
+    "degrees_of_freedom_spec__creative_features_spec__standard_enhancements_catalog__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__product_metadata_automation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__media_type_automation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_uncrop__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__image_background_gen__enroll_status" text
+    "object_story_spec__template_data__link" text
+    "object_story_spec__template_data__message" text
+    "object_story_spec__template_data__name" text
+    "object_story_spec__template_data__multi_share_end_card" bool
+    "object_story_spec__template_data__show_multiple_images" bool
+    "object_story_spec__template_data__call_to_action__type" text
+    "object_story_spec__template_data__format_option" text
+    "object_story_spec__template_data__post_click_configuration__post_click_item_headline" text
+    "object_story_spec__template_data__post_click_configuration__post_click_item_description" text
+    "asset_feed_spec__call_ads_configuration__call_destination_type" text
+    "asset_feed_spec__call_ads_configuration__phone_number" text
+    "degrees_of_freedom_spec__creative_features_spec__hide_price__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__description_automation__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__add_text_overlay__enroll_status" text
+    "degrees_of_freedom_spec__creative_features_spec__adapt_to_placement__enroll_status" text
+    "object_story_spec__template_data__force_single_link" bool
+    "asset_feed_spec__reasons_to_shop" bool
+    "asset_feed_spec__shops_bundle" bool
+    "asset_feed_spec__additional_data__multi_share_end_card" bool
+    "asset_feed_spec__additional_data__is_click_to_message" bool
+    "asset_feed_spec__promotional_metadata__is_auto_update_allowed" bool
+    "degrees_of_freedom_spec__creative_features_spec__image_enhancement__enroll_status" text
+    "object_story_spec__link_data__caption" text
+    "object_story_spec__video_data__link_description" text
+}
+
+Table "ads_insights" [note: 'concept: AdPerformance | role: primary | natural_key: (ad_id, date_start, device_platform) | also_source_for: Ad, AdSet, Campaign, AdAccount (all denorm)'] {
+    "ad_id" text [pk, not null, note: 'natural_key part 1; FK candidate to Ad — bridge to Creative MISSING, requires /ads endpoint']
+    "ad_name" text
+    "adset_id" text
+    "adset_name" text
+    "campaign_id" text
+    "campaign_name" text
+    "account_id" text
+    "account_name" text
+    "impressions" text
+    "spend" text
+    "clicks" text
+    "reach" text
+    "frequency" text
+    "cpc" text
+    "cpm" text
+    "ctr" text
+    "inline_link_clicks" text
+    "inline_link_click_ctr" text
+    "unique_clicks" text
+    "date_start" text [pk, not null, note: 'natural_key part 2']
+    "date_stop" text
+    "device_platform" text [pk, not null, note: 'natural_key part 3 — breakdown dimension']
+    "_dlt_load_id" text [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__bodies" [note: 'concept: CreativeVariant | role: primary | variant_kind: body | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "text" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__descriptions" [note: 'concept: CreativeVariant | role: primary | variant_kind: description | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "text" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__titles" [note: 'concept: CreativeVariant | role: primary | variant_kind: title | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "text" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___100x100" [note: 'excluded: image crop coordinates — no analytic value'] {
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___100x100__list" [note: 'excluded: image crop coordinate list — no analytic value'] {
+    "value" bigint
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___90x160" [note: 'excluded: image crop coordinates — no analytic value'] {
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___90x160__list" [note: 'excluded: image crop coordinate list — no analytic value'] {
+    "value" bigint
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___191x100" [note: 'excluded: image crop coordinates — no analytic value'] {
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__link_data__image_crops___191x100__list" [note: 'excluded: image crop coordinate list — no analytic value'] {
+    "value" bigint
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__onsite_destinations" [note: 'concept: CreativeProductRef | role: primary | natural_key: (creative_id, details_page_product_id) — creative_id walked via _dlt_parent_id'] {
+    "shop_collection_product_set_id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "auto_optimization" text
+    "details_page_product_id" text
+    "storefront_shop_id" text
+}
+
+Table "adcreatives__asset_feed_spec__ad_formats" [note: 'concept: CreativeVariant | role: secondary | variant_kind: ad_format | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__object_story_spec__template_data__retailer_item_ids" [note: 'concept: CreativeProductRef | role: secondary | natural_key: (creative_id, value) — value is the Shopify retailer_item_id'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__videos" [note: 'concept: CreativeVariant | role: primary | variant_kind: video | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "video_id" text
+    "thumbnail_url" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__videos__adlabels" [note: 'excluded: Meta-internal DCO experiment labels — low analytic signal'] {
+    "name" text
+    "id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__bodies__adlabels" [note: 'excluded: Meta-internal DCO experiment labels — low analytic signal'] {
+    "name" text
+    "id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__call_to_action_types" [note: 'concept: CreativeVariant | role: secondary | variant_kind: cta | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__link_urls" [note: 'concept: CreativeVariant | role: secondary | variant_kind: link_url | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "website_url" text
+    "display_url" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__link_urls__adlabels" [note: 'excluded: Meta-internal DCO experiment labels — low analytic signal'] {
+    "name" text
+    "id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__titles__adlabels" [note: 'excluded: Meta-internal DCO experiment labels — low analytic signal'] {
+    "name" text
+    "id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules" [note: 'excluded: placement targeting rules — defer to V2'] {
+    "priority" bigint
+    "title_label__name" text
+    "title_label__id" text
+    "link_url_label__name" text
+    "link_url_label__id" text
+    "body_label__name" text
+    "body_label__id" text
+    "video_label__name" text
+    "video_label__id" text
+    "customization_spec__age_max" bigint
+    "customization_spec__age_min" bigint
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "image_label__name" text
+    "image_label__id" text
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__publisher_platforms" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__facebook_positions" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__instagram_positions" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__messenger_positions" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__audience_network_positions" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__images" [note: 'concept: CreativeVariant | role: primary | variant_kind: image | natural_key: (_dlt_parent_id, _dlt_list_idx)'] {
+    "hash" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__images__adlabels" [note: 'excluded: Meta-internal DCO experiment labels — low analytic signal'] {
+    "name" text
+    "id" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__threads_positions" [note: 'excluded: placement targeting rules — defer'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "adcreatives__asset_feed_spec__promotional_metadata__allowed_coupon_code_sources" [note: 'excluded: coupon source whitelist — narrow, not in stated use cases'] {
+    "value" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Table "ads_insights__actions" [note: 'concept: ConversionEvent | role: primary | metric_kind: count | natural_key: (parent_ad_id, parent_date_start, parent_device_platform, action_type) — parent fields walked via _dlt_parent_id'] {
+    "action_destination" text
+    "action_target_id" text
+    "action_type" text
+    "value" text
+    "_1d_click" text
+    "_7d_click" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "_1d_view" text
+}
+
+Table "ads_insights__action_values" [note: 'concept: ConversionEvent | role: primary | metric_kind: value | natural_key: (parent_ad_id, parent_date_start, parent_device_platform, action_type) — should JOIN to ads_insights__actions on (parent_id, action_type) so each row carries count + value'] {
+    "action_type" text
+    "value" text
+    "_1d_click" text
+    "_7d_click" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "_1d_view" text
+}
+
+Table "ads_insights__purchase_roas" [note: 'concept: AttributedROAS | role: primary | roas_kind: omni | natural_key: (parent_ad_id, parent_date_start, parent_device_platform, action_type, omni) — value is a RATIO; never sum-aggregate'] {
+    "action_type" text
+    "value" text
+    "_1d_click" text
+    "_7d_click" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "_1d_view" text
+}
+
+Table "ads_insights__website_purchase_roas" [note: 'concept: AttributedROAS | role: primary | roas_kind: website | natural_key: (parent_ad_id, parent_date_start, parent_device_platform, action_type, website) — pixel-only; value is a RATIO'] {
+    "action_type" text
+    "value" text
+    "_1d_click" text
+    "_7d_click" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "_1d_view" text
+}
+
+Table "ads_insights__video_play_actions" [note: 'concept: ConversionEvent | role: secondary | metric_kind: video_view | natural_key: (parent_ad_id, parent_date_start, parent_device_platform, action_type)'] {
+    "action_destination" text
+    "action_target_id" text
+    "action_type" text
+    "value" text
+    "_1d_view" text
+    "_dlt_parent_id" text [not null]
+    "_dlt_list_idx" bigint [not null]
+    "_dlt_id" text [unique, not null]
+    "_1d_click" text
+    "_7d_click" text
+}
+
+Table "_dlt_version" [note: 'excluded: dlt internal — schema versioning'] {
+    "version" bigint [not null]
+    "engine_version" bigint [not null]
+    "inserted_at" timestamp [not null]
+    "schema_name" text [not null]
+    "version_hash" text [not null]
+    "schema" text [not null]
+    Note {
+        'Created by DLT. Tracks schema updates'
+    }
+}
+
+Table "_dlt_loads" [note: 'excluded: dlt internal — load package tracking'] {
+    "load_id" text [not null]
+    "schema_name" text
+    "status" bigint [not null]
+    "inserted_at" timestamp [not null]
+    "schema_version_hash" text
+    Note {
+        'Created by DLT. Tracks completed loads'
+    }
+}
+
+Table "_dlt_pipeline_state" [note: 'excluded: dlt internal — pipeline state'] {
+    "version" bigint [not null]
+    "engine_version" bigint [not null]
+    "pipeline_name" text [not null]
+    "state" text [not null]
+    "created_at" timestamp [not null]
+    "version_hash" text
+    "_dlt_load_id" text [not null]
+    "_dlt_id" text [unique, not null]
+}
+
+Ref {
+    "adcreatives"."_dlt_load_id" > "_dlt_loads"."load_id"
+}
+
+Ref {
+    "ads_insights"."_dlt_load_id" > "_dlt_loads"."load_id"
+}
+
+Ref {
+    "_dlt_pipeline_state"."_dlt_load_id" > "_dlt_loads"."load_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__bodies"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__descriptions"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__titles"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___100x100"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___100x100__list"."_dlt_parent_id" > "adcreatives__object_story_spec__link_data__image_crops___100x100"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___90x160"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___90x160__list"."_dlt_parent_id" > "adcreatives__object_story_spec__link_data__image_crops___90x160"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___191x100"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__link_data__image_crops___191x100__list"."_dlt_parent_id" > "adcreatives__object_story_spec__link_data__image_crops___191x100"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__onsite_destinations"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__ad_formats"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__object_story_spec__template_data__retailer_item_ids"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__videos"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__videos__adlabels"."_dlt_parent_id" > "adcreatives__asset_feed_spec__videos"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__bodies__adlabels"."_dlt_parent_id" > "adcreatives__asset_feed_spec__bodies"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__call_to_action_types"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__link_urls"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__link_urls__adlabels"."_dlt_parent_id" > "adcreatives__asset_feed_spec__link_urls"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__titles__adlabels"."_dlt_parent_id" > "adcreatives__asset_feed_spec__titles"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__publisher_platforms"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__facebook_positions"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__instagram_positions"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__messenger_positions"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__audience_network_positions"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__images"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__images__adlabels"."_dlt_parent_id" > "adcreatives__asset_feed_spec__images"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__threads_positions"."_dlt_parent_id" > "adcreatives__asset_feed_spec__asset_customization_rules"."_dlt_id"
+}
+
+Ref {
+    "adcreatives__asset_feed_spec__promotional_metadata__allowed_coupon_code_sources"."_dlt_parent_id" > "adcreatives"."_dlt_id"
+}
+
+Ref {
+    "ads_insights__actions"."_dlt_parent_id" > "ads_insights"."_dlt_id"
+}
+
+Ref {
+    "ads_insights__action_values"."_dlt_parent_id" > "ads_insights"."_dlt_id"
+}
+
+Ref {
+    "ads_insights__purchase_roas"."_dlt_parent_id" > "ads_insights"."_dlt_id"
+}
+
+Ref {
+    "ads_insights__website_purchase_roas"."_dlt_parent_id" > "ads_insights"."_dlt_id"
+}
+
+Ref {
+    "ads_insights__video_play_actions"."_dlt_parent_id" > "ads_insights"."_dlt_id"
+}
+
+Ref {
+    "_dlt_version"."version_hash" < "_dlt_loads"."schema_version_hash"
+}
+
+Ref {
+    "_dlt_version"."schema_name" <> "_dlt_loads"."schema_name"
+}

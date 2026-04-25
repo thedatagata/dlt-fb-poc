@@ -1,0 +1,201 @@
+{
+  "_version": "1.0",
+  "_name": "creative_performance",
+  "Creative": {
+    "description": "An ad creative — one record per Meta creative_id, holding image/video assets, narrative copy (headline, body, description, CTA, link), Instagram actor, and Shopify product_set linkage",
+    "use_cases": ["creative analysis", "ad performance attribution"],
+    "references": ["ad_creative", "creative"],
+    "tables": [
+      {"table": "adcreatives", "source_pipeline": "facebook_marketing", "role": "primary"}
+    ],
+    "natural_key": "id",
+    "assumptions": [
+      "object_story_spec.link_data.* and object_story_spec.video_data.* are mutually exclusive per creative — link_data populated for image link ads, video_data for video ads",
+      "effective_object_story_id resolves to the actual published page post and is the stable cross-platform identifier"
+    ]
+  },
+  "CreativeVariant": {
+    "description": "Multi-asset DCO variants (titles, bodies, descriptions, images, videos, CTAs, ad_formats, link_urls) generated from asset_feed_spec. One Creative → N variants. Used by Meta to combinatorially serve different headline × body × image combinations",
+    "use_cases": ["creative analysis"],
+    "references": ["asset_feed_spec_variant", "dco_variant"],
+    "tables": [
+      {"table": "adcreatives__asset_feed_spec__bodies", "source_pipeline": "facebook_marketing", "role": "primary", "variant_kind": "body"},
+      {"table": "adcreatives__asset_feed_spec__titles", "source_pipeline": "facebook_marketing", "role": "primary", "variant_kind": "title"},
+      {"table": "adcreatives__asset_feed_spec__descriptions", "source_pipeline": "facebook_marketing", "role": "primary", "variant_kind": "description"},
+      {"table": "adcreatives__asset_feed_spec__images", "source_pipeline": "facebook_marketing", "role": "primary", "variant_kind": "image"},
+      {"table": "adcreatives__asset_feed_spec__videos", "source_pipeline": "facebook_marketing", "role": "primary", "variant_kind": "video"},
+      {"table": "adcreatives__asset_feed_spec__call_to_action_types", "source_pipeline": "facebook_marketing", "role": "secondary", "variant_kind": "cta"},
+      {"table": "adcreatives__asset_feed_spec__ad_formats", "source_pipeline": "facebook_marketing", "role": "secondary", "variant_kind": "ad_format"},
+      {"table": "adcreatives__asset_feed_spec__link_urls", "source_pipeline": "facebook_marketing", "role": "secondary", "variant_kind": "link_url"}
+    ],
+    "natural_key": "(_dlt_parent_id, _dlt_list_idx, variant_kind)",
+    "assumptions": [
+      "Meta does not expose stable variant IDs — variants are identified positionally via _dlt_list_idx within the parent creative",
+      "CDM should unpivot these into a single CreativeVariant entity with a variant_kind discriminator",
+      "Meta does not expose per-variant performance — the variant_kind dimension is a description of what was served, not an attribution unit"
+    ]
+  },
+  "CreativeProductRef": {
+    "description": "Shopify catalog references attached to a creative — product set, storefront shop id, individual retailer item ids. The bridge from creative → product catalog",
+    "use_cases": ["product-level creative attribution", "creative analysis"],
+    "references": ["product_reference", "catalog_link"],
+    "tables": [
+      {"table": "adcreatives__asset_feed_spec__onsite_destinations", "source_pipeline": "facebook_marketing", "role": "primary"},
+      {"table": "adcreatives__object_story_spec__template_data__retailer_item_ids", "source_pipeline": "facebook_marketing", "role": "secondary"}
+    ],
+    "natural_key": "(creative_id, product_id)",
+    "assumptions": [
+      "creative_id is derived by walking _dlt_parent_id back to adcreatives._dlt_id",
+      "product_id can be details_page_product_id (single product) or a value from retailer_item_ids[] (carousel/template ads)"
+    ]
+  },
+  "CreativeFeatureFlag": {
+    "description": "Advantage+ and DCO feature enrollment status per creative — derived from the ~33 degrees_of_freedom_spec__creative_features_spec__*__enroll_status columns on adcreatives",
+    "use_cases": ["creative analysis"],
+    "references": ["dof_flag", "advantage_plus_flag"],
+    "tables": [
+      {"table": "adcreatives", "source_pipeline": "facebook_marketing", "role": "wide_source", "transform": "unpivot enroll_status columns to (creative_id, feature_name, enroll_status) rows"}
+    ],
+    "natural_key": "(creative_id, feature_name)",
+    "assumptions": [
+      "Source columns are wide (one column per feature) — CDM materialization requires unpivot in create-transformation step",
+      "feature_name is derived by stripping the degrees_of_freedom_spec__creative_features_spec__ prefix and __enroll_status suffix"
+    ]
+  },
+  "AdPerformance": {
+    "description": "Daily ad performance fact at (ad_id, date, device_platform) grain — impressions, spend, clicks, reach, frequency, ctr, cpc, cpm, inline link clicks, unique clicks. Carries denormalized campaign/adset/ad/account names and ids",
+    "use_cases": ["ad performance analysis", "creative analysis"],
+    "references": ["ad_insight", "ad_stat"],
+    "tables": [
+      {"table": "ads_insights", "source_pipeline": "facebook_marketing", "role": "primary"}
+    ],
+    "natural_key": "(ad_id, date_start, device_platform)",
+    "assumptions": [
+      "All numeric metrics are typed as text in source — CDM must cast to numeric in create-transformation",
+      "device_platform is the only breakdown currently configured; adding more (publisher_platform, country, product_id) would expand the grain"
+    ]
+  },
+  "ConversionEvent": {
+    "description": "Per-action-type conversion events attributed to an ad/day/breakdown. Carries event count + attribution windows (1d_view, 1d_click, 7d_click) and (where applicable) monetary value",
+    "use_cases": ["ad performance analysis", "attribution analysis"],
+    "references": ["action", "conversion", "pixel_event"],
+    "tables": [
+      {"table": "ads_insights__actions", "source_pipeline": "facebook_marketing", "role": "primary", "metric_kind": "count"},
+      {"table": "ads_insights__action_values", "source_pipeline": "facebook_marketing", "role": "primary", "metric_kind": "value"},
+      {"table": "ads_insights__video_play_actions", "source_pipeline": "facebook_marketing", "role": "secondary", "metric_kind": "video_view"}
+    ],
+    "natural_key": "(ad_id, date_start, device_platform, action_type)",
+    "assumptions": [
+      "Joined to AdPerformance via _dlt_parent_id → ads_insights._dlt_id",
+      "actions and action_values share the same (ad_id, date, action_type) grain but are stored separately by Meta — CDM should join them so each ConversionEvent row carries both count and value"
+    ]
+  },
+  "AttributedROAS": {
+    "description": "Purchase ROAS at (ad_id, date, device_platform, action_type) grain with attribution window splits — omni-channel and website (pixel) variants",
+    "use_cases": ["ad performance analysis", "attribution analysis"],
+    "references": ["roas", "purchase_roas"],
+    "tables": [
+      {"table": "ads_insights__purchase_roas", "source_pipeline": "facebook_marketing", "role": "primary", "roas_kind": "omni"},
+      {"table": "ads_insights__website_purchase_roas", "source_pipeline": "facebook_marketing", "role": "primary", "roas_kind": "website"}
+    ],
+    "natural_key": "(ad_id, date_start, device_platform, action_type, roas_kind)",
+    "assumptions": [
+      "value column is the ROAS ratio (revenue / spend), not raw revenue — must NOT sum-aggregate; recompute as SUM(revenue)/NULLIF(SUM(spend),0) at query time",
+      "Pixel-only website_purchase_roas is typically <= omni purchase_roas; comparing the two surfaces attribution-channel divergence"
+    ]
+  },
+  "Ad": {
+    "description": "An individual Meta ad — currently only present as denormalized (ad_id, ad_name) on ads_insights. No standalone source table in this pipeline",
+    "use_cases": ["ad performance analysis", "creative analysis"],
+    "references": ["ad"],
+    "tables": [
+      {"table": "ads_insights", "source_pipeline": "facebook_marketing", "role": "denormalized_source", "transform": "SELECT DISTINCT ad_id, ad_name FROM ads_insights"}
+    ],
+    "natural_key": "ad_id",
+    "assumptions": [
+      "GAP: no creative_id on ads_insights — Ad ↔ Creative bridge is missing. Recommended fix: add /ads endpoint via /new-endpoint to pull (id, creative.id, adset_id, campaign_id, status, effective_status). Without this, AdPerformance cannot join to Creative",
+      "Until the /ads endpoint is added, Ad is materialized as a thin dim from DISTINCT(ad_id, ad_name) on ads_insights"
+    ]
+  },
+  "AdSet": {
+    "description": "Ad set / line item — denormalized as (adset_id, adset_name) on ads_insights. No targeting / budget fields available without an /adsets endpoint",
+    "use_cases": ["ad performance analysis"],
+    "references": ["adset", "line_item"],
+    "tables": [
+      {"table": "ads_insights", "source_pipeline": "facebook_marketing", "role": "denormalized_source", "transform": "SELECT DISTINCT adset_id, adset_name FROM ads_insights"}
+    ],
+    "natural_key": "adset_id",
+    "assumptions": ["No targeting, budget, or schedule attributes available in the POC — would require /adsets endpoint"]
+  },
+  "Campaign": {
+    "description": "Campaign — denormalized as (campaign_id, campaign_name) on ads_insights. No objective / budget / status fields available without a /campaigns endpoint",
+    "use_cases": ["ad performance analysis"],
+    "references": ["campaign"],
+    "tables": [
+      {"table": "ads_insights", "source_pipeline": "facebook_marketing", "role": "denormalized_source", "transform": "SELECT DISTINCT campaign_id, campaign_name FROM ads_insights"}
+    ],
+    "natural_key": "campaign_id",
+    "assumptions": ["No objective, budget, or status attributes available in the POC — would require /campaigns endpoint"]
+  },
+  "AdAccount": {
+    "description": "Meta ad account — denormalized as (account_id, account_name) on ads_insights and adcreatives",
+    "use_cases": ["ad performance analysis", "creative analysis"],
+    "references": ["account", "ad_account"],
+    "tables": [
+      {"table": "ads_insights", "source_pipeline": "facebook_marketing", "role": "denormalized_source"},
+      {"table": "adcreatives", "source_pipeline": "facebook_marketing", "role": "denormalized_source"}
+    ],
+    "natural_key": "account_id",
+    "assumptions": []
+  },
+  "_excluded": [
+    {"table": "_dlt_version", "reason": "dlt internal — schema versioning"},
+    {"table": "_dlt_loads", "reason": "dlt internal — load package tracking"},
+    {"table": "_dlt_pipeline_state", "reason": "dlt internal — pipeline state"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___100x100", "reason": "image crop coordinates — no analytic value"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___100x100__list", "reason": "image crop coordinate list — no analytic value"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___90x160", "reason": "image crop coordinates — no analytic value"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___90x160__list", "reason": "image crop coordinate list — no analytic value"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___191x100", "reason": "image crop coordinates — no analytic value"},
+    {"table": "adcreatives__object_story_spec__link_data__image_crops___191x100__list", "reason": "image crop coordinate list — no analytic value"},
+    {"table": "adcreatives__asset_feed_spec__videos__adlabels", "reason": "Meta-internal DCO experiment labels — low analytic signal"},
+    {"table": "adcreatives__asset_feed_spec__bodies__adlabels", "reason": "Meta-internal DCO experiment labels — low analytic signal"},
+    {"table": "adcreatives__asset_feed_spec__titles__adlabels", "reason": "Meta-internal DCO experiment labels — low analytic signal"},
+    {"table": "adcreatives__asset_feed_spec__link_urls__adlabels", "reason": "Meta-internal DCO experiment labels — low analytic signal"},
+    {"table": "adcreatives__asset_feed_spec__images__adlabels", "reason": "Meta-internal DCO experiment labels — low analytic signal"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules", "reason": "Placement targeting rules — out of scope for the creative-performance MVP; defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__publisher_platforms", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__facebook_positions", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__instagram_positions", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__messenger_positions", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__audience_network_positions", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__asset_customization_rules__customization_spec__threads_positions", "reason": "Placement targeting rules — defer"},
+    {"table": "adcreatives__asset_feed_spec__promotional_metadata__allowed_coupon_code_sources", "reason": "Coupon source whitelist — narrow, not in stated use cases"}
+  ],
+  "_outstanding_work": [
+    {
+      "kind": "missing_endpoint",
+      "description": "Add /ads endpoint to facebook_marketing pipeline (fields: id, creative.id, adset_id, campaign_id, status, effective_status). Required to bridge AdPerformance.ad_id → Creative.id",
+      "skill": "/new-endpoint",
+      "blocks": ["Ad ↔ Creative join in CDM", "creative-level performance attribution"]
+    },
+    {
+      "kind": "transformation",
+      "description": "Unpivot adcreatives.degrees_of_freedom_spec__creative_features_spec__*__enroll_status columns into a long-form CreativeFeatureFlag table (creative_id, feature_name, enroll_status)",
+      "skill": "/create-transformation",
+      "blocks": ["CreativeFeatureFlag entity materialization"]
+    },
+    {
+      "kind": "transformation",
+      "description": "Cast text-typed numeric metrics on ads_insights (impressions, spend, clicks, reach, frequency, cpc, cpm, ctr, inline_link_clicks, inline_link_click_ctr, unique_clicks) to numeric types",
+      "skill": "/create-transformation",
+      "blocks": ["AdPerformance fact in CDM"]
+    },
+    {
+      "kind": "transformation",
+      "description": "Join ads_insights__actions and ads_insights__action_values on (parent_id, action_type) so each ConversionEvent row carries both count and value",
+      "skill": "/create-transformation",
+      "blocks": ["ConversionEvent entity materialization"]
+    }
+  ]
+}

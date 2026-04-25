@@ -1,0 +1,193 @@
+nodes.Entity
+id	label	inferred	assumption
+Creative	Creative	false	Master source: adcreatives. One row per Meta creative_id. Holds image/video assets, narrative copy, Instagram actor, Shopify product_set linkage. Cross-format attributes (link/video/template) are unioned at CDM stage.
+CreativeVariant	CreativeVariant	false	Multi-asset DCO variants. Materialized by unioning 8 child tables (bodies/titles/descriptions/images/videos/ctas/ad_formats/link_urls) with a variant_kind discriminator. Identified positionally — Meta does not expose stable variant IDs.
+CreativeProductRef	CreativeProductRef	false	Shopify catalog references on a creative. Materialized from onsite_destinations + retailer_item_ids. ref_kind discriminator separates single-product vs. collection vs. retailer_item.
+CreativeFeatureFlag	CreativeFeatureFlag	false	Long-form view of the ~33 degrees_of_freedom_spec__creative_features_spec__*__enroll_status columns. Requires column→row unpivot in create-transformation.
+AdPerformance	AdPerformance	false	Daily ad-level fact at (ad_id, date, device_platform) grain. All numeric metrics typed as text in source — must cast to numeric in CDM.
+ConversionEvent	ConversionEvent	false	Per-action-type events joined from ads_insights__actions and ads_insights__action_values on (parent_id, action_type) so each row carries both count and value.
+AttributedROAS	AttributedROAS	false	Per-action-type ROAS at attribution-window grain. value is a RATIO (revenue/spend) — must NOT sum-aggregate; recompute as SUM(rev)/NULLIF(SUM(spend),0).
+Ad	Ad	false	Denormalized dim derived from DISTINCT(ad_id, ad_name) on ads_insights. Bridge to Creative is MISSING — requires /ads endpoint to add creative_id.
+AdSet	AdSet	false	Denormalized dim from ads_insights. No targeting/budget/schedule attributes available without /adsets endpoint.
+Campaign	Campaign	false	Denormalized dim from ads_insights. No objective/budget/status attributes available without /campaigns endpoint.
+AdAccount	AdAccount	false	Denormalized dim from (account_id, account_name) on ads_insights and adcreatives.
+
+nodes.Attribute
+entity	name	type	master_source	also_in	note
+:Entity:Creative	creative_id	text	adcreatives.id		natural_key; primary key
+:Entity:Creative	account_id	text	adcreatives.account_id		FK → AdAccount
+:Entity:Creative	name	text	adcreatives.name		creative name (often timestamp-suffixed)
+:Entity:Creative	status	text	adcreatives.status		ACTIVE | PAUSED | DELETED
+:Entity:Creative	object_type	text	adcreatives.object_type		SHARE | VIDEO | PHOTO etc.
+:Entity:Creative	call_to_action_type	text	adcreatives.call_to_action_type		canonical CTA (e.g. SHOP_NOW)
+:Entity:Creative	effective_object_story_id	text	adcreatives.effective_object_story_id		stable cross-platform post id
+:Entity:Creative	instagram_user_id	text	adcreatives.instagram_user_id	adcreatives.object_story_spec__instagram_user_id	IG actor account
+:Entity:Creative	page_id	text	adcreatives.object_story_spec__page_id		FB page id
+:Entity:Creative	image_hash	text	adcreatives.image_hash	adcreatives.object_story_spec__link_data__image_hash, adcreatives.object_story_spec__video_data__image_hash	primary image asset
+:Entity:Creative	image_url	text	adcreatives.image_url	adcreatives.object_story_spec__video_data__image_url		preview/thumbnail URL
+:Entity:Creative	thumbnail_url	text	adcreatives.thumbnail_url		thumbnail
+:Entity:Creative	video_id	text	adcreatives.video_id	adcreatives.object_story_spec__video_data__video_id	primary video asset (if video creative)
+:Entity:Creative	headline	text	adcreatives.object_story_spec__link_data__name	adcreatives.object_story_spec__template_data__name, adcreatives.object_story_spec__video_data__title	UNIONED across link/template/video formats — canonical headline
+:Entity:Creative	body	text	adcreatives.object_story_spec__link_data__message	adcreatives.object_story_spec__template_data__message, adcreatives.object_story_spec__video_data__message	UNIONED across formats — canonical body copy
+:Entity:Creative	description	text	adcreatives.object_story_spec__link_data__description	adcreatives.object_story_spec__video_data__link_description	canonical description/subhead
+:Entity:Creative	caption	text	adcreatives.object_story_spec__link_data__caption		display caption (link host)
+:Entity:Creative	destination_url	text	adcreatives.object_story_spec__link_data__link	adcreatives.object_story_spec__template_data__link, adcreatives.object_story_spec__link_data__call_to_action__value__link, adcreatives.object_story_spec__video_data__call_to_action__value__link	canonical landing URL
+:Entity:Creative	asset_feed_optimization_type	text	adcreatives.asset_feed_spec__optimization_type		DEGREES_OF_FREEDOM | FORMAT_AUTOMATION (DCO mode)
+:Entity:Creative	use_flexible_image_aspect_ratio	bool	adcreatives.object_story_spec__link_data__use_flexible_image_aspect_ratio
+:Entity:Creative	is_click_to_message	bool	adcreatives.asset_feed_spec__additional_data__is_click_to_message
+:Entity:Creative	is_multi_share_end_card	bool	adcreatives.asset_feed_spec__additional_data__multi_share_end_card	adcreatives.object_story_spec__template_data__multi_share_end_card
+:Entity:Creative	show_multiple_images	bool	adcreatives.object_story_spec__template_data__show_multiple_images
+:Entity:Creative	force_single_link	bool	adcreatives.object_story_spec__template_data__force_single_link
+:Entity:Creative	is_shops_bundle	bool	adcreatives.asset_feed_spec__shops_bundle
+:Entity:Creative	is_reasons_to_shop	bool	adcreatives.asset_feed_spec__reasons_to_shop
+:Entity:Creative	is_auto_update_allowed	bool	adcreatives.asset_feed_spec__promotional_metadata__is_auto_update_allowed
+:Entity:Creative	template_format_option	text	adcreatives.object_story_spec__template_data__format_option
+:Entity:Creative	template_post_click_headline	text	adcreatives.object_story_spec__template_data__post_click_configuration__post_click_item_headline
+:Entity:Creative	template_post_click_description	text	adcreatives.object_story_spec__template_data__post_click_configuration__post_click_item_description
+:Entity:Creative	call_destination_type	text	adcreatives.asset_feed_spec__call_ads_configuration__call_destination_type		WEBSITE | CALL | WEBSITE_AND_CALL
+:Entity:Creative	call_phone_number	text	adcreatives.asset_feed_spec__call_ads_configuration__phone_number
+:Entity:Creative	primary_product_set_id	text	adcreatives.product_set_id		FK → Shopify product_set (if catalog ad)
+
+:Entity:CreativeVariant	creative_id	text	derived from _dlt_parent_id walk to adcreatives._dlt_id		FK → Creative
+:Entity:CreativeVariant	variant_kind	text	discriminator		body | title | description | image | video | cta | ad_format | link_url
+:Entity:CreativeVariant	position	bigint	_dlt_list_idx		positional ordering within parent
+:Entity:CreativeVariant	text	text	adcreatives__asset_feed_spec__bodies.text	adcreatives__asset_feed_spec__titles.text, adcreatives__asset_feed_spec__descriptions.text	body/title/description content
+:Entity:CreativeVariant	enum_value	text	adcreatives__asset_feed_spec__call_to_action_types.value	adcreatives__asset_feed_spec__ad_formats.value	cta or ad_format value
+:Entity:CreativeVariant	image_hash	text	adcreatives__asset_feed_spec__images.hash
+:Entity:CreativeVariant	video_id	text	adcreatives__asset_feed_spec__videos.video_id
+:Entity:CreativeVariant	thumbnail_url	text	adcreatives__asset_feed_spec__videos.thumbnail_url
+:Entity:CreativeVariant	website_url	text	adcreatives__asset_feed_spec__link_urls.website_url
+:Entity:CreativeVariant	display_url	text	adcreatives__asset_feed_spec__link_urls.display_url
+
+:Entity:CreativeProductRef	creative_id	text	derived from _dlt_parent_id walk		FK → Creative
+:Entity:CreativeProductRef	ref_kind	text	discriminator		single_product | collection | retailer_item
+:Entity:CreativeProductRef	product_id	text	adcreatives__asset_feed_spec__onsite_destinations.details_page_product_id	adcreatives__object_story_spec__template_data__retailer_item_ids.value	Shopify product id
+:Entity:CreativeProductRef	product_set_id	text	adcreatives__asset_feed_spec__onsite_destinations.shop_collection_product_set_id
+:Entity:CreativeProductRef	storefront_shop_id	text	adcreatives__asset_feed_spec__onsite_destinations.storefront_shop_id
+:Entity:CreativeProductRef	auto_optimization	text	adcreatives__asset_feed_spec__onsite_destinations.auto_optimization
+
+:Entity:CreativeFeatureFlag	creative_id	text	derived from adcreatives.id (post-unpivot)		FK → Creative
+:Entity:CreativeFeatureFlag	feature_name	text	derived from column name (strip degrees_of_freedom_spec__creative_features_spec__ prefix and __enroll_status suffix)		e.g. advantage_plus_creative, image_enhancement, text_optimizations
+:Entity:CreativeFeatureFlag	enroll_status	text	adcreatives.degrees_of_freedom_spec__creative_features_spec__*__enroll_status		OPT_IN | OPT_OUT | OPT_OUT_BY_USER
+
+:Entity:AdPerformance	ad_id	text	ads_insights.ad_id		natural_key part 1; FK → Ad
+:Entity:AdPerformance	date_start	date	ads_insights.date_start		natural_key part 2 (cast text→date)
+:Entity:AdPerformance	device_platform	text	ads_insights.device_platform		natural_key part 3 — breakdown
+:Entity:AdPerformance	date_stop	date	ads_insights.date_stop
+:Entity:AdPerformance	ad_name	text	ads_insights.ad_name		denorm
+:Entity:AdPerformance	adset_id	text	ads_insights.adset_id		FK → AdSet
+:Entity:AdPerformance	adset_name	text	ads_insights.adset_name		denorm
+:Entity:AdPerformance	campaign_id	text	ads_insights.campaign_id		FK → Campaign
+:Entity:AdPerformance	campaign_name	text	ads_insights.campaign_name		denorm
+:Entity:AdPerformance	account_id	text	ads_insights.account_id		FK → AdAccount
+:Entity:AdPerformance	account_name	text	ads_insights.account_name		denorm
+:Entity:AdPerformance	impressions	int64	ads_insights.impressions		cast text→int64
+:Entity:AdPerformance	reach	int64	ads_insights.reach		cast text→int64
+:Entity:AdPerformance	clicks	int64	ads_insights.clicks		cast text→int64
+:Entity:AdPerformance	inline_link_clicks	int64	ads_insights.inline_link_clicks		cast text→int64
+:Entity:AdPerformance	unique_clicks	int64	ads_insights.unique_clicks		cast text→int64
+:Entity:AdPerformance	spend	decimal	ads_insights.spend		cast text→decimal; currency USD assumed
+:Entity:AdPerformance	frequency	decimal	ads_insights.frequency		cast text→decimal; ratio
+:Entity:AdPerformance	cpc	decimal	ads_insights.cpc		cast text→decimal; ratio
+:Entity:AdPerformance	cpm	decimal	ads_insights.cpm		cast text→decimal; ratio
+:Entity:AdPerformance	ctr	decimal	ads_insights.ctr		cast text→decimal; ratio (percent)
+:Entity:AdPerformance	inline_link_click_ctr	decimal	ads_insights.inline_link_click_ctr		cast text→decimal; ratio
+
+:Entity:ConversionEvent	ad_id	text	ads_insights.ad_id (via _dlt_parent_id)		natural_key part 1; FK → AdPerformance
+:Entity:ConversionEvent	date_start	date	ads_insights.date_start (via _dlt_parent_id)		natural_key part 2
+:Entity:ConversionEvent	device_platform	text	ads_insights.device_platform (via _dlt_parent_id)		natural_key part 3
+:Entity:ConversionEvent	action_type	text	ads_insights__actions.action_type	ads_insights__action_values.action_type, ads_insights__video_play_actions.action_type	natural_key part 4
+:Entity:ConversionEvent	action_destination	text	ads_insights__actions.action_destination	ads_insights__video_play_actions.action_destination
+:Entity:ConversionEvent	action_target_id	text	ads_insights__actions.action_target_id	ads_insights__video_play_actions.action_target_id
+:Entity:ConversionEvent	count	decimal	ads_insights__actions.value		event count; cast text→decimal
+:Entity:ConversionEvent	count_1d_view	decimal	ads_insights__actions._1d_view		1-day view-attributed count
+:Entity:ConversionEvent	count_1d_click	decimal	ads_insights__actions._1d_click		1-day click-attributed count
+:Entity:ConversionEvent	count_7d_click	decimal	ads_insights__actions._7d_click		7-day click-attributed count
+:Entity:ConversionEvent	value	decimal	ads_insights__action_values.value		monetary value; cast text→decimal
+:Entity:ConversionEvent	value_1d_view	decimal	ads_insights__action_values._1d_view
+:Entity:ConversionEvent	value_1d_click	decimal	ads_insights__action_values._1d_click
+:Entity:ConversionEvent	value_7d_click	decimal	ads_insights__action_values._7d_click
+
+:Entity:AttributedROAS	ad_id	text	ads_insights.ad_id (via _dlt_parent_id)		natural_key part 1
+:Entity:AttributedROAS	date_start	date	ads_insights.date_start (via _dlt_parent_id)		natural_key part 2
+:Entity:AttributedROAS	device_platform	text	ads_insights.device_platform (via _dlt_parent_id)		natural_key part 3
+:Entity:AttributedROAS	action_type	text	ads_insights__purchase_roas.action_type	ads_insights__website_purchase_roas.action_type	natural_key part 4
+:Entity:AttributedROAS	roas_kind	text	discriminator		omni | website
+:Entity:AttributedROAS	roas	decimal	ads_insights__purchase_roas.value	ads_insights__website_purchase_roas.value	RATIO — do NOT sum
+:Entity:AttributedROAS	roas_1d_view	decimal	ads_insights__purchase_roas._1d_view	ads_insights__website_purchase_roas._1d_view	RATIO
+:Entity:AttributedROAS	roas_1d_click	decimal	ads_insights__purchase_roas._1d_click	ads_insights__website_purchase_roas._1d_click	RATIO
+:Entity:AttributedROAS	roas_7d_click	decimal	ads_insights__purchase_roas._7d_click	ads_insights__website_purchase_roas._7d_click	RATIO
+
+:Entity:Ad	ad_id	text	ads_insights.ad_id		natural_key
+:Entity:Ad	ad_name	text	ads_insights.ad_name
+:Entity:Ad	adset_id	text	ads_insights.adset_id		FK → AdSet
+:Entity:Ad	campaign_id	text	ads_insights.campaign_id		FK → Campaign
+:Entity:Ad	account_id	text	ads_insights.account_id		FK → AdAccount
+:Entity:Ad	creative_id	text	(missing — requires /ads endpoint)		GAP — see SemanticGap
+
+:Entity:AdSet	adset_id	text	ads_insights.adset_id		natural_key
+:Entity:AdSet	adset_name	text	ads_insights.adset_name
+:Entity:AdSet	campaign_id	text	ads_insights.campaign_id		FK → Campaign
+:Entity:AdSet	account_id	text	ads_insights.account_id		FK → AdAccount
+
+:Entity:Campaign	campaign_id	text	ads_insights.campaign_id		natural_key
+:Entity:Campaign	campaign_name	text	ads_insights.campaign_name
+:Entity:Campaign	account_id	text	ads_insights.account_id		FK → AdAccount
+
+:Entity:AdAccount	account_id	text	ads_insights.account_id	adcreatives.account_id	natural_key
+:Entity:AdAccount	account_name	text	ads_insights.account_name
+
+edges.HAS_VARIANT
+from	to	via	cardinality	inferred
+:Entity:Creative	:Entity:CreativeVariant	adcreatives._dlt_id ← child._dlt_parent_id	1:N	false
+
+edges.REFERENCES_PRODUCT
+from	to	via	cardinality	inferred
+:Entity:Creative	:Entity:CreativeProductRef	adcreatives._dlt_id ← child._dlt_parent_id	1:N	false
+
+edges.HAS_FEATURE_FLAG
+from	to	via	cardinality	inferred
+:Entity:Creative	:Entity:CreativeFeatureFlag	adcreatives.id (post-unpivot)	1:N	false
+
+edges.BELONGS_TO_ACCOUNT
+from	to	via	cardinality	inferred
+:Entity:Creative	:Entity:AdAccount	adcreatives.account_id	N:1	false
+:Entity:AdPerformance	:Entity:AdAccount	ads_insights.account_id	N:1	false
+:Entity:Ad	:Entity:AdAccount	ads_insights.account_id	N:1	false
+:Entity:AdSet	:Entity:AdAccount	ads_insights.account_id	N:1	false
+:Entity:Campaign	:Entity:AdAccount	ads_insights.account_id	N:1	false
+
+edges.MEASURES
+from	to	via	cardinality	inferred
+:Entity:AdPerformance	:Entity:Ad	ads_insights.ad_id	N:1	false
+
+edges.BELONGS_TO_ADSET
+from	to	via	cardinality	inferred
+:Entity:Ad	:Entity:AdSet	ads_insights.adset_id	N:1	false
+:Entity:AdPerformance	:Entity:AdSet	ads_insights.adset_id	N:1	false
+
+edges.BELONGS_TO_CAMPAIGN
+from	to	via	cardinality	inferred
+:Entity:AdSet	:Entity:Campaign	ads_insights.campaign_id	N:1	false
+:Entity:Ad	:Entity:Campaign	ads_insights.campaign_id	N:1	false
+:Entity:AdPerformance	:Entity:Campaign	ads_insights.campaign_id	N:1	false
+
+edges.HAS_CONVERSION_EVENT
+from	to	via	cardinality	inferred
+:Entity:AdPerformance	:Entity:ConversionEvent	ads_insights._dlt_id ← (actions|action_values|video_play_actions)._dlt_parent_id	1:N	false
+
+edges.HAS_ATTRIBUTED_ROAS
+from	to	via	cardinality	inferred
+:Entity:AdPerformance	:Entity:AttributedROAS	ads_insights._dlt_id ← (purchase_roas|website_purchase_roas)._dlt_parent_id	1:N	false
+
+edges.RENDERS_AS
+from	to	via	cardinality	inferred
+:Entity:Ad	:Entity:Creative	ads.creative_id (MISSING — requires /ads endpoint)	N:1	true
+
+nodes.SemanticGap
+concept	use_case	note
+Ad↔Creative bridge	creative-level performance attribution	No creative_id on ads_insights and no /ads endpoint pulled. Recommend /new-endpoint to add /{ad_account}/ads with fields=id,creative{id},adset_id,campaign_id,status,effective_status. Without this, AdPerformance cannot join to Creative — only to denormalized ad_id/ad_name.
+Campaign objective/budget	ad performance analysis	ads_insights only carries (campaign_id, campaign_name). Objective, daily_budget, lifetime_budget, status, start_time/stop_time require /campaigns endpoint.
+AdSet targeting/budget/schedule	ad performance analysis	Similar to Campaign — /adsets endpoint needed for targeting_spec, budget, optimization_goal, billing_event.
+Shopify product metadata	product-level creative attribution	CreativeProductRef carries product_id but no name, sku, price, inventory, product_type. Requires Shopify ingestion pipeline.
+CreativeVariant performance	creative analysis	Meta does not expose per-variant impressions/clicks/spend in ads_insights. Variant-level performance attribution is not derivable from this pipeline alone.
