@@ -1,0 +1,33 @@
+# Minimal docker stack for the lakehouse POC.
+#
+# Only service is cloud-sql-proxy — the dlt pipelines run locally via
+# `uv run`, but the demo notebook (Phase D, DuckDB postgres extension)
+# needs a TCP path to the staging app Postgres. Bring it up with:
+#
+#   docker compose up -d cloud-sql-proxy
+#
+# Then the notebook can connect at host=localhost port=5432.
+#
+# Env vars expected (from .env, see .env.example):
+#   GCS_CREDS_PATH                       — host path to GCP SA JSON
+#   CLOUD_SQL_INSTANCE_CONNECTION_NAME   — e.g. axon-platform:us-central1:core
+services:
+  cloud-sql-proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+    container_name: cloud-sql-proxy
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /secrets/gcs-key.json
+    volumes:
+      - ${GCS_CREDS_PATH}:/secrets/gcs-key.json:ro
+    command:
+      - "--address=0.0.0.0"
+      - "--port=5432"
+      - "${CLOUD_SQL_INSTANCE_CONNECTION_NAME}"
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/cloud-sql-proxy", "--help"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

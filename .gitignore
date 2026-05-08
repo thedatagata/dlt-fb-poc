@@ -12,7 +12,18 @@ secrets.toml
 config.toml
 .workspace
 .toolkits
-.var 
-_local 
+.var
+_local
 .claude
+
+# Local secrets / env
+.env
+
+# Notebook state (per-notebook marimo cache)
+__marimo__/
+
+# macOS
+.DS_Store
+
+poc_clients.yaml
 
